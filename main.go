@@ -1,7 +1,7 @@
 package main
 
 import (
-	json2 "encoding/json"
+	"encoding/json"
 	"fmt"
 	"github.com/caseyjmorris/threadsquish/scripts"
 	"log"
@@ -24,9 +24,9 @@ func parseProfile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Error parsing file:  %v", err), http.StatusInternalServerError)
 		return
 	}
-	json, _ := json2.Marshal(parsed)
+	jsonText, _ := json.Marshal(parsed)
 	w.Header().Set("Content-Type", "application/json")
-	_, _ = w.Write(json)
+	_, _ = w.Write(jsonText)
 }
 
 func main() {
