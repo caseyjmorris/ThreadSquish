@@ -1,4 +1,4 @@
-package serve
+package scripts
 
 import (
 	"bytes"
