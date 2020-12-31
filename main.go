@@ -48,6 +48,9 @@ func main() {
 	http.HandleFunc("/threadsquish.js", func(writer http.ResponseWriter, request *http.Request) {
 		serveStatic(writer, "static/threadsquish.js", "text/javascript")
 	})
+	http.HandleFunc("/threadsquish.css", func(writer http.ResponseWriter, request *http.Request) {
+		serveStatic(writer, "static/threadsquish.css", "text/css")
+	})
 	http.HandleFunc("/profile", parseProfile)
 	err := http.ListenAndServe(":9090", nil)
 	if err != nil {

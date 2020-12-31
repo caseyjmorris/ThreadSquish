@@ -48,10 +48,9 @@
             let innerText = `<div class="menu-option-container" id="${name}-container">\n`;
             innerText += `<label for="${name}">${opt.default}</label>\n`;
             if (opt.description !== "") {
-                innerText += `<p>(${opt.description})</p>`
+                innerText += `<p class="explicatory">(${opt.description})</p>`
             }
             innerText += `<select name="${name}" id="${name}">\n`
-            innerText += `<option value="">${opt.default}</option>\n`
             for (let [key, value] of Object.entries(opt.cases)) {
                 innerText += `<option value="${key}">${value}</option>\n`
             }
