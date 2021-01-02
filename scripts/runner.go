@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"sync"
 	"sync/atomic"
@@ -23,7 +22,7 @@ type Runner struct {
 	locker        *uint32
 	Script        string
 	Errors        []string
-	StopRequested bool
+	stopRequested bool
 	Enqueued      []string
 	Successful    []string
 	Failed        []string
@@ -32,7 +31,12 @@ type Runner struct {
 	Done          bool
 }
 
-func (r *Runner) IdentifyTargets(directory string, extension string, sample string, excluded map[string]bool) ([]string, error) {
+func (r *Runner) Stop() {
+	r.stopRequested = true
+}
+
+func (r *Runner) IdentifyTargets(directory string, extension string, sample string,
+	excluded map[string]bool) ([]string, error) {
 	var result []string
 	foundSample := false
 	var innerErr error
@@ -82,7 +86,8 @@ func (r *Runner) ReadExcluded(path string) ([]string, error) {
 	return result, nil
 }
 
-func (r *Runner) RunScript(degreeOfParallelism int, script string, targets []string, argv []string, bookkeepingFile string) error {
+func (r *Runner) RunScript(degreeOfParallelism int, script string, targets []string, argv []string,
+	bookkeepingFile string, commander Commander) error {
 	err := r.tryLock()
 	if err != nil {
 		return err
@@ -106,7 +111,7 @@ func (r *Runner) RunScript(degreeOfParallelism int, script string, targets []str
 	}
 
 	for i := 0; i < degreeOfParallelism; i++ {
-		go r.runScriptForChannel(targetQ, doneQ, script, argv)
+		go r.runScriptForChannel(targetQ, doneQ, script, argv, commander)
 	}
 
 	var innerErr error
@@ -130,9 +135,10 @@ func (r *Runner) unlock() {
 	atomic.StoreUint32(r.locker, 0)
 }
 
-func (r *Runner) runScriptForChannel(targetQ <-chan string, doneQ chan<- scriptResult, script string, argv []string) {
+func (r *Runner) runScriptForChannel(targetQ <-chan string, doneQ chan<- scriptResult, script string, argv []string,
+	commander Commander) {
 	for target := range targetQ {
-		if r.StopRequested {
+		if r.stopRequested {
 			doneQ <- scriptResult{
 				Path:    target,
 				Success: false,
@@ -142,7 +148,8 @@ func (r *Runner) runScriptForChannel(targetQ <-chan string, doneQ chan<- scriptR
 			return
 		}
 		args := append([]string{script, target}, argv...)
-		cmd := exec.Command("cmd.exe", args...)
+		//cmd := exec.Command("cmd.exe", args...)
+		cmd := commander.Command("cmd.exe", args...)
 		err := cmd.Run()
 		if err != nil {
 			doneQ <- scriptResult{
