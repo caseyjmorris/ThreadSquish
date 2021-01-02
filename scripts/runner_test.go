@@ -3,6 +3,7 @@ package scripts
 import (
 	"bufio"
 	"bytes"
+	"github.com/caseyjmorris/threadsquish/testHelpers"
 	"os/exec"
 	"reflect"
 	"strconv"
@@ -169,5 +170,29 @@ func TestRunner_runScriptWithCommanderStopRequested(t *testing.T) {
 
 	if !reflect.DeepEqual(runner.Skipped, expectedSkipped) {
 		t.Errorf("Expected skipped records %v but found %v", expectedSkipped, runner.Skipped)
+	}
+}
+
+func TestRunner_readExcluded(t *testing.T) {
+	runner := Runner{}
+	path := testHelpers.GetFixturePath("workdir\\progress.txt")
+	err := testHelpers.Unix2Dos(path)
+	if err != nil {
+		t.Errorf("error ensuring DOS line endings:  %s", err)
+		return
+	}
+	expected := map[string]bool{
+		"fakemovie3.usm": true,
+		"fakemovie2.usm": true,
+	}
+
+	result, err := runner.readExcluded(path)
+	if err != nil {
+		t.Errorf("error reading file:  %s", err)
+		return
+	}
+
+	if !reflect.DeepEqual(expected, result) {
+		t.Errorf("Expected %v but found %v", expected, result)
 	}
 }

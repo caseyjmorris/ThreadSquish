@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sync"
 	"sync/atomic"
 )
@@ -36,8 +37,7 @@ func (r *Runner) Stop() {
 	r.stopRequested = true
 }
 
-func (r *Runner) IdentifyTargets(directory string, extension string, sample string,
-	excluded map[string]bool) ([]string, error) {
+func (r *Runner) IdentifyTargets(directory string, extension string, sample string) ([]string, error) {
 	var result []string
 	foundSample := false
 	var innerErr error
@@ -50,10 +50,6 @@ func (r *Runner) IdentifyTargets(directory string, extension string, sample stri
 		}
 		if info.Name() == sample {
 			foundSample = true
-		}
-		if excluded[path] {
-			r.Skipped = append(r.Skipped, path)
-			return nil
 		}
 
 		r.Enqueued = append(r.Enqueued, path)
@@ -74,6 +70,7 @@ func (r *Runner) IdentifyTargets(directory string, extension string, sample stri
 }
 
 func (r *Runner) readExcluded(path string) (map[string]bool, error) {
+	whitespace := regexp.MustCompile("^\\s*$")
 	text, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("error opening %q:  %s", path, err)
@@ -81,6 +78,9 @@ func (r *Runner) readExcluded(path string) (map[string]bool, error) {
 	result := make(map[string]bool)
 
 	for _, file := range bytes.Split(text, []byte("\r\n")) {
+		if whitespace.Match(file) {
+			continue
+		}
 		result[string(file)] = true
 	}
 
