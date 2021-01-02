@@ -120,3 +120,54 @@ func TestRunner_runScriptWithCommanderOutputWithoutParallelism(t *testing.T) {
 		t.Errorf("Expected skipped records %v but found %v", expectedSkipped, runner.Skipped)
 	}
 }
+
+func TestRunner_runScriptWithCommanderStopRequested(t *testing.T) {
+	commander := TestCommander{}
+	runner := Runner{}
+	var b bytes.Buffer
+	writer := bufio.NewWriter(&b)
+	var targets []string
+	excluded := make(map[string]bool)
+	for i := 0; i < 10; i++ {
+		targets = append(targets, strconv.Itoa(i))
+		if i > 5 {
+			excluded[strconv.Itoa(i)] = true
+		}
+	}
+
+	runner.Stop()
+	if !runner.stopRequested {
+		t.Error("failed to stop")
+		return
+	}
+
+	err := runner.runScriptWithCommander(1, "c:\\users\\my user\\script.cmd", targets,
+		[]string{"a", "b", "c"}, excluded, writer, &commander)
+
+	if err != nil {
+		t.Errorf("failed running script:  %s", err)
+		return
+	}
+
+	for i := 0; i < 10; i++ {
+		str := strconv.Itoa(i)
+		_, ok := commander.Targets.Load(str)
+		if ok {
+			t.Errorf("unexpected inclusion value %t for %q", ok, str)
+		}
+	}
+
+	expectedSink := ""
+	writer.Flush()
+	resultSink := b.String()
+
+	if resultSink != expectedSink {
+		t.Errorf("Unexpected bookkeeping file result:  \r\n%v\r\n\r\nExpected:  \r\n%v", resultSink, expectedSink)
+	}
+
+	expectedSkipped := []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
+
+	if !reflect.DeepEqual(runner.Skipped, expectedSkipped) {
+		t.Errorf("Expected skipped records %v but found %v", expectedSkipped, runner.Skipped)
+	}
+}
