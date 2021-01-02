@@ -196,3 +196,39 @@ func TestRunner_readExcluded(t *testing.T) {
 		t.Errorf("Expected %v but found %v", expected, result)
 	}
 }
+
+func TestRunner_IdentifyTargets(t *testing.T) {
+	runner := Runner{}
+	path := testHelpers.GetFixturePath("workdir")
+	result, err := runner.IdentifyTargets(path, ".usm", "fakemovie1.usm")
+	if err != nil {
+		t.Errorf("error identifying targets:  %s", err)
+		return
+	}
+	expected := []string{testHelpers.GetFixturePath("workdir\\fakemovie1.usm"),
+		testHelpers.GetFixturePath("workdir\\fakemovie2.usm"),
+		testHelpers.GetFixturePath("workdir\\fakemovie3.usm"),
+		testHelpers.GetFixturePath("workdir\\fakemovie4.usm")}
+
+	if !reflect.DeepEqual(expected, result) {
+		t.Errorf("expected %v but got %v", expected, result)
+	}
+}
+
+func TestRunner_IdentifyTargets_SampleDoesNotExist(t *testing.T) {
+	runner := Runner{}
+	path := testHelpers.GetFixturePath("workdir")
+	result, err := runner.IdentifyTargets(path, ".usm", "realmovie1.usm")
+	if err == nil {
+		t.Error("expected error")
+		return
+	}
+	expected := []string{testHelpers.GetFixturePath("workdir\\fakemovie1.usm"),
+		testHelpers.GetFixturePath("workdir\\fakemovie2.usm"),
+		testHelpers.GetFixturePath("workdir\\fakemovie3.usm"),
+		testHelpers.GetFixturePath("workdir\\fakemovie4.usm")}
+
+	if !reflect.DeepEqual(expected, result) {
+		t.Errorf("expected %v but got %v", expected, result)
+	}
+}

@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
 )
 
 func GetFixturePath(fixture string) string {
-	return path.Join(getRootDir(), "testFiles", fixture)
+	return filepath.Join(getRootDir(), "testFiles", fixture)
 }
 
 func Unix2Dos(path string) error {
