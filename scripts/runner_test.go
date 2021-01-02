@@ -14,7 +14,7 @@ type TestCommander struct {
 }
 
 func (t *TestCommander) Command(name string, arg ...string) *exec.Cmd {
-	t.Targets.Store(arg[0], arg)
+	t.Targets.Store(arg[1], arg)
 	cmd := exec.Cmd{}
 	return &cmd
 }
@@ -46,14 +46,15 @@ func TestRunner_runScriptWithCommander(t *testing.T) {
 	var b bytes.Buffer
 	writer := bufio.NewWriter(&b)
 	var targets []string
-	var excluded []string
+	excluded := make(map[string]bool)
 	for i := 0; i < 50; i++ {
 		targets = append(targets, strconv.Itoa(i))
 		if i > 25 {
-			excluded = append(excluded, strconv.Itoa(i))
+			excluded[strconv.Itoa(i)] = true
 		}
 	}
-	err := runner.runScriptWithCommander(16, "c:\\users\\my user\\script.cmd", targets, []string{"a", "b", "c"}, writer, &commander)
+	err := runner.runScriptWithCommander(16, "c:\\users\\my user\\script.cmd", targets,
+		[]string{"a", "b", "c"}, excluded, writer, &commander)
 
 	if err != nil {
 		t.Errorf("failed running script:  %s", err)
@@ -65,7 +66,7 @@ func TestRunner_runScriptWithCommander(t *testing.T) {
 		_, ok := commander.Targets.Load(str)
 		if i > 25 == ok {
 			t.Errorf("unexpected inclusion value %t for %q", ok, str)
-			return
+			//return
 		}
 	}
 }

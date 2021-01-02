@@ -73,15 +73,15 @@ func (r *Runner) IdentifyTargets(directory string, extension string, sample stri
 	return result, nil
 }
 
-func (r *Runner) ReadExcluded(path string) ([]string, error) {
+func (r *Runner) readExcluded(path string) (map[string]bool, error) {
 	text, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("error opening %q:  %s", path, err)
 	}
-	var result []string
+	result := make(map[string]bool)
 
 	for _, file := range bytes.Split(text, []byte("\r\n")) {
-		result = append(result, string(file))
+		result[string(file)] = true
 	}
 
 	return result, nil
@@ -89,15 +89,20 @@ func (r *Runner) ReadExcluded(path string) ([]string, error) {
 
 func (r *Runner) RunScript(degreeOfParallelism int, script string, targets []string, argv []string,
 	bookkeepingFile string) error {
+	excluded, err := r.readExcluded(bookkeepingFile)
+	if err != nil {
+		return fmt.Errorf("error opening book-keeping file %q:  %s", bookkeepingFile, err)
+	}
 	sink, err := os.OpenFile(bookkeepingFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return fmt.Errorf("error opening book-keeping file %q:  %s", bookkeepingFile, err)
 	}
-	return r.runScriptWithCommander(degreeOfParallelism, script, targets, argv, sink, &StandardCommander{})
+
+	return r.runScriptWithCommander(degreeOfParallelism, script, targets, argv, excluded, sink, &StandardCommander{})
 }
 
 func (r *Runner) runScriptWithCommander(degreeOfParallelism int, script string, targets []string, argv []string,
-	sink io.Writer, commander Commander) error {
+	excluded map[string]bool, sink io.Writer, commander Commander) error {
 	err := r.tryLock()
 	if err != nil {
 		return err
@@ -106,6 +111,14 @@ func (r *Runner) runScriptWithCommander(degreeOfParallelism int, script string, 
 	defer r.unlock()
 
 	var wg sync.WaitGroup
+	var scrubbedTargets []string
+
+	for _, el := range targets {
+		if !excluded[el] {
+			scrubbedTargets = append(scrubbedTargets, el)
+		}
+	}
+	targets = scrubbedTargets
 	wg.Add(len(targets))
 
 	targetQ := make(chan string, len(targets))
@@ -150,26 +163,17 @@ func (r *Runner) runScriptForChannel(targetQ <-chan string, doneQ chan<- scriptR
 				Skipped: true,
 				Err:     nil,
 			}
-			return
+			continue
 		}
 		args := append([]string{script, target}, argv...)
 		//cmd := exec.Command("cmd.exe", args...)
 		cmd := commander.Command("cmd.exe", args...)
 		err := cmd.Run()
-		if err != nil {
-			doneQ <- scriptResult{
-				Path:    target,
-				Success: false,
-				Skipped: false,
-				Err:     err,
-			}
-			return
-		}
 		doneQ <- scriptResult{
 			Path:    target,
-			Success: true,
+			Success: err == nil,
 			Skipped: false,
-			Err:     nil,
+			Err:     err,
 		}
 	}
 }
