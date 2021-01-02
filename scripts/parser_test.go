@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestParseINIFile(t *testing.T) {
+func Test_ParseINIFile(t *testing.T) {
 	file, err := ParseINIFile(testHelpers.GetFixturePath("simpleSample.cmd"))
 	if err != nil {
 		t.Error(err)

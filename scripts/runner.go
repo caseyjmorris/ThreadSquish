@@ -20,7 +20,7 @@ type scriptResult struct {
 }
 
 type Runner struct {
-	locker        *uint32
+	locker        uint32
 	Script        string
 	Errors        []string
 	stopRequested bool
@@ -130,14 +130,14 @@ func (r *Runner) runScriptWithCommander(degreeOfParallelism int, script string, 
 }
 
 func (r *Runner) tryLock() error {
-	if !atomic.CompareAndSwapUint32(r.locker, 0, 1) {
+	if !atomic.CompareAndSwapUint32(&r.locker, 0, 1) {
 		return errors.New("another script is already running")
 	}
 	return nil
 }
 
 func (r *Runner) unlock() {
-	atomic.StoreUint32(r.locker, 0)
+	atomic.StoreUint32(&r.locker, 0)
 }
 
 func (r *Runner) runScriptForChannel(targetQ <-chan string, doneQ chan<- scriptResult, script string, argv []string,
