@@ -83,10 +83,12 @@ func (r *Runner) ReadExcluded(path string) ([]string, error) {
 }
 
 func (r *Runner) RunScript(degreeOfParallelism int, script string, targets []string, argv []string, bookkeepingFile string) error {
-	if !atomic.CompareAndSwapUint32(r.locker, 0, 1) {
-		return errors.New("another script is already running")
+	err := r.tryLock()
+	if err != nil {
+		return err
 	}
-	defer atomic.StoreUint32(r.locker, 0)
+
+	defer r.unlock()
 
 	sink, err := os.OpenFile(bookkeepingFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -115,6 +117,17 @@ func (r *Runner) RunScript(degreeOfParallelism int, script string, targets []str
 	r.Done = true
 
 	return innerErr
+}
+
+func (r *Runner) tryLock() error {
+	if !atomic.CompareAndSwapUint32(r.locker, 0, 1) {
+		return errors.New("another script is already running")
+	}
+	return nil
+}
+
+func (r *Runner) unlock() {
+	atomic.StoreUint32(r.locker, 0)
 }
 
 func (r *Runner) runScriptForChannel(targetQ <-chan string, doneQ chan<- scriptResult, script string, argv []string) {
