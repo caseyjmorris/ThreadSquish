@@ -111,14 +111,7 @@ func (r *Runner) runScriptWithCommander(degreeOfParallelism int, script string, 
 	defer r.unlock()
 
 	var wg sync.WaitGroup
-	var scrubbedTargets []string
 
-	for _, el := range targets {
-		if !excluded[el] {
-			scrubbedTargets = append(scrubbedTargets, el)
-		}
-	}
-	targets = scrubbedTargets
 	wg.Add(len(targets))
 
 	targetQ := make(chan string, len(targets))
@@ -129,7 +122,7 @@ func (r *Runner) runScriptWithCommander(degreeOfParallelism int, script string, 
 	}
 
 	for i := 0; i < degreeOfParallelism; i++ {
-		go r.runScriptForChannel(targetQ, doneQ, script, argv, commander)
+		go r.runScriptForChannel(targetQ, doneQ, script, argv, excluded, commander)
 	}
 
 	var innerErr error
@@ -154,9 +147,9 @@ func (r *Runner) unlock() {
 }
 
 func (r *Runner) runScriptForChannel(targetQ <-chan string, doneQ chan<- scriptResult, script string, argv []string,
-	commander Commander) {
+	excluded map[string]bool, commander Commander) {
 	for target := range targetQ {
-		if r.stopRequested {
+		if r.stopRequested || excluded[target] {
 			doneQ <- scriptResult{
 				Path:    target,
 				Success: false,
