@@ -62,7 +62,7 @@ func (r *Runner) IdentifyTargets(directory string, extension string, sample stri
 		return result, fmt.Errorf("error walking directory:  %s", innerErr)
 	}
 	if !foundSample {
-		return result, fmt.Errorf("did not find sample %v in %v", sample, directory)
+		return result, fmt.Errorf("did not find sample %q in %q", sample, directory)
 	}
 
 	return result, nil
@@ -71,7 +71,7 @@ func (r *Runner) IdentifyTargets(directory string, extension string, sample stri
 func (r *Runner) ReadExcluded(path string) ([]string, error) {
 	text, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("error opening %v:  %s", path, err)
+		return nil, fmt.Errorf("error opening %q:  %s", path, err)
 	}
 	var result []string
 
@@ -90,7 +90,7 @@ func (r *Runner) RunScript(degreeOfParallelism int, script string, targets []str
 
 	sink, err := os.OpenFile(bookkeepingFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		return fmt.Errorf("error opening book-keeping file %v:  %s", bookkeepingFile, err)
+		return fmt.Errorf("error opening book-keeping file %q:  %s", bookkeepingFile, err)
 	}
 
 	var wg sync.WaitGroup
@@ -120,7 +120,6 @@ func (r *Runner) RunScript(degreeOfParallelism int, script string, targets []str
 func (r *Runner) runScriptForChannel(targetQ <-chan string, doneQ chan<- scriptResult, script string, argv []string) {
 	for target := range targetQ {
 		if r.StopRequested {
-			//wg.Done()
 			doneQ <- scriptResult{
 				Path:    target,
 				Success: false,

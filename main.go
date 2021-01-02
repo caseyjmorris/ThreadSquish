@@ -16,13 +16,13 @@ func parseProfile(w http.ResponseWriter, r *http.Request) {
 	_, err := os.Stat(filePath)
 	if os.IsNotExist(err) {
 		w.WriteHeader(http.StatusNotFound)
-		http.Error(w, fmt.Sprintf("%v does not exist", filePath), http.StatusNotFound)
+		http.Error(w, fmt.Sprintf("%q does not exist", filePath), http.StatusNotFound)
 		return
 	}
 	parsed, err := scripts.ParseINIFile(filePath)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		http.Error(w, fmt.Sprintf("Error parsing file:  %v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Error parsing file:  %q", err), http.StatusInternalServerError)
 		return
 	}
 	jsonText, _ := json.Marshal(parsed)
@@ -34,7 +34,7 @@ func serveStatic(w http.ResponseWriter, location string, contentType string) {
 	body, err := ioutil.ReadFile(location)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		http.Error(w, fmt.Sprintf("Error opening %v:  %v", location, err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Error opening %q:  %s", location, err), http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", contentType)

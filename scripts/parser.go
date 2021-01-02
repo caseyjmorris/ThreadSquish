@@ -16,14 +16,14 @@ func ParseINIFile(path string) (FormFields, error) {
 
 	cfg, err := ini.Load(str)
 	if err != nil {
-		return FormFields{}, fmt.Errorf("error parsing INI file %v: %s", path, err)
+		return FormFields{}, fmt.Errorf("error parsing INI file %q: %s", path, err)
 	}
 
 	profile := cfg.Section("PROFILE")
 	format := profile.Key("format").String()
 	formatParts := strings.Split(format, "|")
 	if len(formatParts) != 2 {
-		return FormFields{}, fmt.Errorf("invalid format string %v", format)
+		return FormFields{}, fmt.Errorf("invalid format string %q", format)
 	}
 
 	menuIdx := 2
@@ -76,12 +76,12 @@ func readMenuItem(section *ini.Section) MenuOption {
 func getTrimmedINI(path string) ([]byte, error) {
 	byteArray, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("error opening %v:  %s", path, err)
+		return nil, fmt.Errorf("error opening %q:  %s", path, err)
 	}
 	profileIdx := bytes.Index(byteArray, []byte("[PROFILE]"))
 	batchIdx := bytes.LastIndex(byteArray, []byte("[BATCH]"))
 	if profileIdx == -1 || batchIdx == -1 {
-		return nil, fmt.Errorf("%v is not a valid profile", path)
+		return nil, fmt.Errorf("%q is not a valid profile", path)
 	}
 	return byteArray[profileIdx:batchIdx], nil
 }
