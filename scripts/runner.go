@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -87,18 +88,22 @@ func (r *Runner) ReadExcluded(path string) ([]string, error) {
 }
 
 func (r *Runner) RunScript(degreeOfParallelism int, script string, targets []string, argv []string,
-	bookkeepingFile string, commander Commander) error {
+	bookkeepingFile string) error {
+	sink, err := os.OpenFile(bookkeepingFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return fmt.Errorf("error opening book-keeping file %q:  %s", bookkeepingFile, err)
+	}
+	return r.runScriptWithCommander(degreeOfParallelism, script, targets, argv, sink, &StandardCommander{})
+}
+
+func (r *Runner) runScriptWithCommander(degreeOfParallelism int, script string, targets []string, argv []string,
+	sink io.Writer, commander Commander) error {
 	err := r.tryLock()
 	if err != nil {
 		return err
 	}
 
 	defer r.unlock()
-
-	sink, err := os.OpenFile(bookkeepingFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return fmt.Errorf("error opening book-keeping file %q:  %s", bookkeepingFile, err)
-	}
 
 	var wg sync.WaitGroup
 	wg.Add(len(targets))
@@ -169,7 +174,7 @@ func (r *Runner) runScriptForChannel(targetQ <-chan string, doneQ chan<- scriptR
 	}
 }
 
-func (r *Runner) processScriptResults(doneQ <-chan scriptResult, innerErr *error, sink *os.File, wg *sync.WaitGroup) {
+func (r *Runner) processScriptResults(doneQ <-chan scriptResult, innerErr *error, sink io.Writer, wg *sync.WaitGroup) {
 	for result := range doneQ {
 		if result.Skipped {
 			r.Skipped = append(r.Skipped, result.Path)
@@ -177,7 +182,7 @@ func (r *Runner) processScriptResults(doneQ <-chan scriptResult, innerErr *error
 			r.Failed = append(r.Failed, result.Path)
 		} else {
 			r.Successful = append(r.Successful, result.Path)
-			_, err := sink.WriteString(result.Path + "\r\n")
+			_, err := sink.Write([]byte(result.Path + "\r\n"))
 			innerErr = &err
 		}
 		wg.Done()
