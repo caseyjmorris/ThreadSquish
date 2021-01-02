@@ -97,6 +97,7 @@ func (r *Runner) RunScript(degreeOfParallelism int, script string, targets []str
 	if err != nil {
 		return fmt.Errorf("error opening book-keeping file %q:  %s", bookkeepingFile, err)
 	}
+	defer sink.Close()
 
 	return r.runScriptWithCommander(degreeOfParallelism, script, targets, argv, excluded, sink, &StandardCommander{})
 }
