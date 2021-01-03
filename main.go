@@ -8,6 +8,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
+	"time"
 )
 
 var runner = scripts.Runner{}
@@ -93,8 +95,11 @@ func main() {
 	http.HandleFunc("/status", status)
 	http.HandleFunc("/stop", stop)
 	http.HandleFunc("/terminate", terminate)
+	go func() {
+		time.Sleep(time.Second)
+		cmd := exec.Command("powershell.exe", "-command", "start http://localhost:9090")
+		cmd.Start()
+	}()
 	err := http.ListenAndServe(":9090", nil)
-	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
-	}
+	log.Fatal("ListenAndServe: ", err)
 }
