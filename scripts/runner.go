@@ -91,11 +91,15 @@ func (r *Runner) RunScript(degreeOfParallelism int, script string, targets []str
 	bookkeepingFile string) error {
 	excluded, err := r.readExcluded(bookkeepingFile)
 	if err != nil {
-		return fmt.Errorf("error opening book-keeping file %q:  %s", bookkeepingFile, err)
+		errTxt := fmt.Sprintf("error opening book-keeping file %q:  %s", bookkeepingFile, err)
+		r.Errors = append(r.Errors, errTxt)
+		return errors.New(errTxt)
 	}
 	sink, err := os.OpenFile(bookkeepingFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		return fmt.Errorf("error opening book-keeping file %q:  %s", bookkeepingFile, err)
+		errTxt := fmt.Sprintf("error opening book-keeping file %q:  %s", bookkeepingFile, err)
+		r.Errors = append(r.Errors, errTxt)
+		return errors.New(errTxt)
 	}
 	defer sink.Close()
 

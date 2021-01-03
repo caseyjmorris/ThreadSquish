@@ -16,7 +16,8 @@ type FormFields struct {
 }
 
 type CommandRequest struct {
-	Script    string   `json:"script"`
-	Directory string   `json:"directory"`
-	Arguments []string `json:"arguments"`
+	DegreeOfParallelism int      `json:"degreeOfParallelism"`
+	Script              string   `json:"script"`
+	Directory           string   `json:"directory"`
+	Arguments           []string `json:"arguments"`
 }
