@@ -14,3 +14,9 @@ type FormFields struct {
 	Description string       `json:"description"`
 	Options     []MenuOption `json:"options"`
 }
+
+type CommandRequest struct {
+	Script    string   `json:"script"`
+	Directory string   `json:"directory"`
+	Arguments []string `json:"arguments"`
+}

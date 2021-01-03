@@ -22,19 +22,20 @@ type scriptResult struct {
 
 type Runner struct {
 	locker        uint32
-	Script        string
-	Errors        []string
-	stopRequested bool
-	Enqueued      []string
-	Successful    []string
-	Failed        []string
-	Skipped       []string
-	Canceled      []string
-	Done          bool
+	Script        string   `json:"script"`
+	Errors        []string `json:"errors"`
+	StopRequested bool     `json:"stopRequested"`
+	Enqueued      []string `json:"enqueued"`
+	Successful    []string `json:"successful"`
+	Failed        []string `json:"failed"`
+	Skipped       []string `json:"skipped"`
+	Canceled      []string `json:"canceled"`
+	Started       bool     `json:"started"`
+	Done          bool     `json:"done"`
 }
 
 func (r *Runner) Stop() {
-	r.stopRequested = true
+	r.StopRequested = true
 }
 
 func (r *Runner) IdentifyTargets(directory string, extension string, sample string) ([]string, error) {
@@ -52,7 +53,6 @@ func (r *Runner) IdentifyTargets(directory string, extension string, sample stri
 			foundSample = true
 		}
 
-		r.Enqueued = append(r.Enqueued, path)
 		result = append(result, path)
 		return nil
 	})
@@ -109,6 +109,8 @@ func (r *Runner) runScriptWithCommander(degreeOfParallelism int, script string, 
 		return err
 	}
 
+	r.Started = true
+
 	defer r.unlock()
 
 	var wg sync.WaitGroup
@@ -117,6 +119,7 @@ func (r *Runner) runScriptWithCommander(degreeOfParallelism int, script string, 
 
 	targetQ := make(chan string, len(targets))
 	doneQ := make(chan scriptResult, len(targets))
+	r.Enqueued = append(r.Enqueued, targets...)
 
 	for _, target := range targets {
 		targetQ <- target
@@ -150,7 +153,7 @@ func (r *Runner) unlock() {
 func (r *Runner) runScriptForChannel(targetQ <-chan string, doneQ chan<- scriptResult, script string, argv []string,
 	excluded map[string]bool, commander Commander) {
 	for target := range targetQ {
-		if r.stopRequested || excluded[target] {
+		if r.StopRequested || excluded[target] {
 			doneQ <- scriptResult{
 				Path:    target,
 				Success: false,

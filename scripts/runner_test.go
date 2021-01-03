@@ -137,7 +137,7 @@ func TestRunner_runScriptWithCommanderStopRequested(t *testing.T) {
 	}
 
 	runner.Stop()
-	if !runner.stopRequested {
+	if !runner.StopRequested {
 		t.Error("failed to stop")
 		return
 	}
