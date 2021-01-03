@@ -7,8 +7,77 @@
     document.addEventListener("DOMContentLoaded", init);
     const domParser = new DOMParser();
 
-    function init() {
+    async function init() {
         $('#profile-load').onclick = handleProfileLoad;
+        $('#terminate-button').onclick = handleTerminate;
+        $('#stop-button').onclick = handleStop;
+        await getStatus();
+        setInterval(getStatus, 2000)
+    }
+
+    async function getStatus() {
+        const resp = await fetch('/status');
+        if (!resp.ok) {
+            console.log(resp);
+            alert(resp.statusText);
+            return;
+        }
+
+        const status = await resp.json();
+        if (!status.started) {
+            return;
+        }
+
+        enterProgressMode();
+
+        renderProgressSection(status);
+    }
+
+    async function handleStop(event) {
+        event.preventDefault();
+        const resp = await fetch('/stop', {method: 'POST'});
+        if (!resp.ok) {
+            console.log(resp);
+            alert(resp.statusText);
+            return;
+        }
+        await getStatus();
+    }
+
+    async function handleTerminate(event) {
+        event.preventDefault();
+        const resp = await fetch('/terminate', {method: 'POST'});
+        if (!resp.ok) {
+            console.log(resp);
+            alert(resp.statusText);
+            return;
+        }
+        alert('Application terminated.');
+    }
+
+    // todo pause and term buttons
+
+    function renderProgressSection(status) {
+        const progress = ((status.successful.length + status.failed.length + status.skipped.length) / status.enqueued.length) * 100;
+        $('#stop-requested-msg').style.display = status.stopRequested ? 'block' : 'none';
+        $('#progress-percentage').innerText = progress.toString();
+        const successfulRecords = $('#successful-records');
+        for (let successful of status.successful) {
+            successfulRecords.innerHTML += `<li> ${successful}`
+        }
+        const skippedRecords = $('#skipped-records');
+        for (let skipped of status.skipped) {
+            skippedRecords.innerHTML += `<li> ${skipped}`
+        }
+        const failedRecords = $('#failed-records');
+        for (let failed of status.failed) {
+            failedRecords.innerHTML += `<li> ${failed}`
+        }
+    }
+
+    function enterProgressMode() {
+        $('#not-running').style.display = 'none';
+        $('#in-progress').style.display = 'block';
     }
 
     async function handleProfileLoad(event) {

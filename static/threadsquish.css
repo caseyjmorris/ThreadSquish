@@ -32,3 +32,11 @@ p.explicatory {
 .pre-spaced {
     white-space: pre;
 }
+
+#form-area {
+    display: none;
+}
+
+#in-progress {
+    display: none;
+}

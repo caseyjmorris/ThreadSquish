@@ -29,7 +29,6 @@ type Runner struct {
 	Successful    []string `json:"successful"`
 	Failed        []string `json:"failed"`
 	Skipped       []string `json:"skipped"`
-	Canceled      []string `json:"canceled"`
 	Started       bool     `json:"started"`
 	Done          bool     `json:"done"`
 }

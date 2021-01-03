@@ -20,7 +20,7 @@
     <input type="text" name="profile" id="profile">
     <button type="button" name="profile-load" id="profile-load">Load</button>
 
-    <form id="form-area" style="display: none">
+    <form id="form-area">
         <h2 id="game-name">
             (Game)
         </h2>
@@ -43,6 +43,44 @@
 
         </div>
     </form>
+</div>
+
+<div id="in-progress">
+    <button id="terminate-button" type="button">
+        Terminate application
+    </button>
+
+    <button id="stop-button" type="button">
+        Pause
+    </button>
+
+    <p id="stop-requested-msg">
+        Stop requested!  Currently in-progress items will finish but no more will be started.
+    </p>
+
+    <p>
+        Progress:  <span id="progress-percentage"></span>%
+    </p>
+
+    <h4>
+        Successful records
+    </h4>
+
+    <ul id="successful-records">
+
+    </ul>
+
+    <h4>
+        Failed records
+    </h4>
+
+    <ul id="failed-records"></ul>
+
+    <h4>
+        Skipped records
+    </h4>
+
+    <ul id="skipped-records"></ul>
 </div>
 </body>
 </html>
