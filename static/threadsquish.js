@@ -55,8 +55,6 @@
         alert('Application terminated.');
     }
 
-    // todo pause and term buttons
-
     function renderProgressSection(status) {
         const progress = ((status.successful.length + status.failed.length + status.skipped.length) / status.enqueued.length) * 100;
         $('#stop-requested-msg').style.display = status.stopRequested ? 'block' : 'none';
