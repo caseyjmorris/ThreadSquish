@@ -10,38 +10,39 @@
 <h1>
     Threadsquish
 </h1>
-
-<p class="warning">
-    Please note that profiles are essentially batch scripts&mdash;you are running a program that could do anything
-    to your system when you load one.  <strong>Only run profiles from sources you trust!</strong>
-</p>
-
-<label for="profile">Profile</label>
-<input type="text" name="profile" id="profile">
-<button type="button" name="profile-load" id="profile-load">Load</button>
-
-<form id="form-area" style="display: none">
-    <h2 id="game-name">
-        (Game)
-    </h2>
-
-    <p class="pre-spaced" id="game-description">
-        (Description)
+<div class="not-running">
+    <p class="warning">
+        Please note that profiles are essentially batch scripts&mdash;you are running a program that could do anything
+        to your system when you load one.  <strong>Only run profiles from sources you trust!</strong>
     </p>
 
-    <label for="directory">
-        Directory (should contain <span class="code" id="format">(format)</span> files such as <span class="code" id="example">(example)</span>)
-    </label>
-    <input type="text" name="directory" id="directory">
+    <label for="profile">Profile</label>
+    <input type="text" name="profile" id="profile">
+    <button type="button" name="profile-load" id="profile-load">Load</button>
 
-    <label for="degree-of-parallelism">
-        Degree of parallelism
-    </label>
-    <input type="number" name="degree-of-parallelism" id="degree-of-parallelism" min="1" max="512" step="1" value="1">
+    <form id="form-area" style="display: none">
+        <h2 id="game-name">
+            (Game)
+        </h2>
 
-    <div id="menu-options">
+        <p class="pre-spaced" id="game-description">
+            (Description)
+        </p>
 
-    </div>
-</form>
+        <label for="directory">
+            Directory (should contain <span class="code" id="format">(format)</span> files such as <span class="code" id="example">(example)</span>)
+        </label>
+        <input type="text" name="directory" id="directory">
+
+        <label for="degree-of-parallelism">
+            Degree of parallelism
+        </label>
+        <input type="number" name="degree-of-parallelism" id="degree-of-parallelism" min="1" max="512" step="1" value="1">
+
+        <div id="menu-options">
+
+        </div>
+    </form>
+</div>
 </body>
 </html>
