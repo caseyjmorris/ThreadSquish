@@ -29,6 +29,12 @@
             return;
         }
 
+        // ((status.successful.length + status.failed.length + status.skipped.length) / status.enqueued.length)
+        status.successful = status.successful || [];
+        status.failed = status.failed || [];
+        status.skipped = status.skipped || [];
+        status.enqueued = status.enqueued || [];
+
         enterProgressMode();
 
         renderProgressSection(status);
@@ -78,14 +84,17 @@
         $('#stop-requested-msg').style.display = status.stopRequested ? 'block' : 'none';
         $('#progress-percentage').innerText = progress.toString();
         const successfulRecords = $('#successful-records');
+        successfulRecords.innerHTML = '';
         for (let successful of status.successful) {
             successfulRecords.innerHTML += `<li> ${successful}`
         }
         const skippedRecords = $('#skipped-records');
+        skippedRecords.innerHTML = '';
         for (let skipped of status.skipped) {
             skippedRecords.innerHTML += `<li> ${skipped}`
         }
         const failedRecords = $('#failed-records');
+        failedRecords.innerHTML = '';
         for (let failed of status.failed) {
             failedRecords.innerHTML += `<li> ${failed}`
         }

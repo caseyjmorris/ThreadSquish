@@ -169,11 +169,12 @@ func (r *Runner) runScriptForChannel(targetQ <-chan string, doneQ chan<- scriptR
 			}
 			continue
 		}
-		args := append([]string{script, target}, argv...)
+		args := append([]string{"/C", script, target}, argv...)
 		//cmd := exec.Command("cmd.exe", args...)
 		cmd := commander.Command("cmd.exe", args...)
-		output, err := cmd.Output()
-		log.Print(output)
+		cmd.Dir = filepath.Dir(script)
+		output, err := cmd.CombinedOutput()
+		log.Print(string(output))
 		//err := cmd.Run()
 		doneQ <- scriptResult{
 			Path:    target,
