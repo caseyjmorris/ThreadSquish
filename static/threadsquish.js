@@ -103,7 +103,7 @@
             failedRecords.innerHTML += `<li> ${failed}`
         }
 
-        $('#image-zone').innerHTML = `<img alt="preview" src="/preview">`
+        $('#image-zone').innerHTML = `<img id="preview" alt="preview" src="/preview">`
     }
 
     function enterProgressMode() {
