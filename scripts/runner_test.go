@@ -15,7 +15,7 @@ type TestCommander struct {
 	Targets sync.Map
 }
 
-func (t *TestCommander) Command(name string, arg ...string) *exec.Cmd {
+func (t *TestCommander) Command(_ string, arg ...string) *exec.Cmd {
 	t.Targets.Store(arg[2], arg)
 	cmd := exec.Command("cmd.exe", "/C", "echo", "hello")
 	return cmd
@@ -55,7 +55,7 @@ func TestRunner_runScriptWithCommander(t *testing.T) {
 			excluded[strconv.Itoa(i)] = true
 		}
 	}
-	err := runner.runScriptWithCommander(16, "c:\\users\\my user\\script.cmd", targets,
+	err := runner.runScriptWithCommander(16, testHelpers.GetFixturePath("simpleSample.cmd"), targets,
 		[]string{"a", "b", "c"}, excluded, writer, &commander)
 
 	if err != nil {
@@ -85,7 +85,7 @@ func TestRunner_runScriptWithCommanderOutputWithoutParallelism(t *testing.T) {
 			excluded[strconv.Itoa(i)] = true
 		}
 	}
-	err := runner.runScriptWithCommander(1, "c:\\users\\my user\\script.cmd", targets,
+	err := runner.runScriptWithCommander(1, testHelpers.GetFixturePath("simpleSample.cmd"), targets,
 		[]string{"a", "b", "c"}, excluded, writer, &commander)
 
 	if err != nil {
@@ -102,7 +102,7 @@ func TestRunner_runScriptWithCommanderOutputWithoutParallelism(t *testing.T) {
 	}
 
 	expectedSink := "0\r\n1\r\n2\r\n3\r\n4\r\n5\r\n"
-	writer.Flush()
+	_ = writer.Flush()
 	resultSink := b.String()
 
 	if resultSink != expectedSink {
@@ -142,7 +142,7 @@ func TestRunner_runScriptWithCommanderStopRequested(t *testing.T) {
 		return
 	}
 
-	err := runner.runScriptWithCommander(1, "c:\\users\\my user\\script.cmd", targets,
+	err := runner.runScriptWithCommander(1, testHelpers.GetFixturePath("simpleSample.cmd"), targets,
 		[]string{"a", "b", "c"}, excluded, writer, &commander)
 
 	if err != nil {
@@ -159,7 +159,7 @@ func TestRunner_runScriptWithCommanderStopRequested(t *testing.T) {
 	}
 
 	expectedSink := ""
-	writer.Flush()
+	_ = writer.Flush()
 	resultSink := b.String()
 
 	if resultSink != expectedSink {
