@@ -16,7 +16,7 @@ type TestCommander struct {
 }
 
 func (t *TestCommander) Command(name string, arg ...string) *exec.Cmd {
-	t.Targets.Store(arg[1], arg)
+	t.Targets.Store(arg[2], arg)
 	cmd := exec.Command("cmd.exe", "/C", "echo", "hello")
 	return cmd
 }
