@@ -11,6 +11,7 @@
         $('#profile-load').onclick = handleProfileLoad;
         $('#terminate-button').onclick = handleTerminate;
         $('#stop-button').onclick = handleStop;
+        $('#start-button').onclick = handleStart;
         await getStatus();
         setInterval(getStatus, 2000)
     }
@@ -31,6 +32,23 @@
         enterProgressMode();
 
         renderProgressSection(status);
+    }
+
+    async function handleStart(event) {
+        event.preventDefault();
+        const body = {
+            degreeOfParallelism: parseInt($('#degree-of-parallelism').value, 10),
+            script: $('#profile').value,
+            directory: $('#directory').value,
+            arguments: $$('#menu-options select').map(el => el.value),
+        }
+        const resp = await fetch('/start', {method: 'POST', body: JSON.stringify(body)})
+        if (!resp.ok) {
+            console.log(resp);
+            alert(resp.statusText);
+            return;
+        }
+        await getStatus();
     }
 
     async function handleStop(event) {
@@ -97,7 +115,7 @@
 
     function renderForm() {
         $('#game-name').innerText = profile.name;
-        $('#game-description').innerText = profile.description;
+        $('#game-description').innerHTML = profile.description.replaceAll('\\n', '<br>');
         $('#format').innerText = profile.formatName;
         $('#example').innerText = profile.example;
         renderOptions(profile.options);

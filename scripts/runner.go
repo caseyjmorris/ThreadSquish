@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -71,6 +72,9 @@ func (r *Runner) IdentifyTargets(directory string, extension string, sample stri
 func (r *Runner) readExcluded(path string) (map[string]bool, error) {
 	whitespace := regexp.MustCompile("^\\s*$")
 	text, err := ioutil.ReadFile(path)
+	if os.IsNotExist(err) {
+		return make(map[string]bool), nil
+	}
 	if err != nil {
 		return nil, fmt.Errorf("error opening %q:  %s", path, err)
 	}
@@ -168,7 +172,9 @@ func (r *Runner) runScriptForChannel(targetQ <-chan string, doneQ chan<- scriptR
 		args := append([]string{script, target}, argv...)
 		//cmd := exec.Command("cmd.exe", args...)
 		cmd := commander.Command("cmd.exe", args...)
-		err := cmd.Run()
+		output, err := cmd.Output()
+		log.Print(output)
+		//err := cmd.Run()
 		doneQ <- scriptResult{
 			Path:    target,
 			Success: err == nil,
