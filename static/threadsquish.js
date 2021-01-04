@@ -82,7 +82,7 @@
     function renderProgressSection(status) {
         const progress = ((status.successful.length + status.failed.length + status.skipped.length) / status.enqueued.length) * 100;
         $('#stop-requested-msg').style.display = status.stopRequested ? 'block' : 'none';
-        $('#progress-percentage').innerText = progress.toString();
+        $('#progress-percentage').innerText = progress.toFixed(2);
         const successfulRecords = $('#successful-records');
         successfulRecords.innerHTML = '';
         for (let successful of status.successful) {
@@ -98,6 +98,8 @@
         for (let failed of status.failed) {
             failedRecords.innerHTML += `<li> ${failed}`
         }
+
+        //$('#image-zone').innerHTML = `<img alt="preview" src="file:///${status.directory}\\preview.jpg">`
     }
 
     function enterProgressMode() {

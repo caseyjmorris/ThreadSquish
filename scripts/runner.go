@@ -32,6 +32,7 @@ type Runner struct {
 	Skipped       []string `json:"skipped"`
 	Started       bool     `json:"started"`
 	Done          bool     `json:"done"`
+	Directory     string   `json:"directory"`
 }
 
 func (r *Runner) Stop() {
@@ -39,6 +40,7 @@ func (r *Runner) Stop() {
 }
 
 func (r *Runner) IdentifyTargets(directory string, extension string, sample string) ([]string, error) {
+	r.Directory = directory
 	var result []string
 	foundSample := false
 	var innerErr error
