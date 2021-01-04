@@ -143,6 +143,9 @@ func main() {
 	http.HandleFunc("/stop", stop)
 	http.HandleFunc("/terminate", terminate)
 	http.HandleFunc("/start", start)
+	http.HandleFunc("/preview", func(writer http.ResponseWriter, request *http.Request) {
+		serveStatic(writer, filepath.Join(runner.Directory, "preview.jpg"), "image/jpeg")
+	})
 	go func() {
 		time.Sleep(time.Second)
 		cmd := exec.Command("powershell.exe", "-command", "start http://localhost:9090")

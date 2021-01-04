@@ -3,6 +3,7 @@
     const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 
     let profile;
+    let lastStatus;
 
     document.addEventListener("DOMContentLoaded", init);
     const domParser = new DOMParser();
@@ -13,10 +14,13 @@
         $('#stop-button').onclick = handleStop;
         $('#start-button').onclick = handleStart;
         await getStatus();
-        setInterval(getStatus, 2000)
+        setInterval(getStatus, 20000)
     }
 
     async function getStatus() {
+        if (lastStatus && lastStatus.done) {
+            return;
+        }
         const resp = await fetch('/status');
         if (!resp.ok) {
             console.log(resp);
@@ -29,11 +33,11 @@
             return;
         }
 
-        // ((status.successful.length + status.failed.length + status.skipped.length) / status.enqueued.length)
         status.successful = status.successful || [];
         status.failed = status.failed || [];
         status.skipped = status.skipped || [];
         status.enqueued = status.enqueued || [];
+        lastStatus = status;
 
         enterProgressMode();
 
@@ -99,7 +103,7 @@
             failedRecords.innerHTML += `<li> ${failed}`
         }
 
-        //$('#image-zone').innerHTML = `<img alt="preview" src="file:///${status.directory}\\preview.jpg">`
+        $('#image-zone').innerHTML = `<img alt="preview" src="/preview">`
     }
 
     function enterProgressMode() {
