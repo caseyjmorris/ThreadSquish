@@ -29,10 +29,6 @@ p.explicatory {
     background-color: #ccc;
 }
 
-.pre-spaced {
-    white-space: pre;
-}
-
 #form-area {
     display: none;
 }
