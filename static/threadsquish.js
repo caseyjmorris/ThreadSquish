@@ -10,9 +10,13 @@
 
     async function init() {
         $('#profile-load').onclick = handleProfileLoad;
-        $('#terminate-button').onclick = handleTerminate;
         $('#stop-button').onclick = handleStop;
         $('#start-button').onclick = handleStart;
+
+        for (const button of $$('.terminate-button')) {
+            button.onclick = handleTerminate;
+        }
+
         await getStatus();
         setInterval(getStatus, 20000)
     }
